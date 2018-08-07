@@ -22,7 +22,7 @@ int in_array(int num, int pos)
     }
 }
 
-/* Reverse a number */
+/* Reverse a number; ex 92 ==> 29 */
 int _reverse_number(int num)
 {
     int rem; int base = num;
@@ -66,6 +66,20 @@ int merge_array()
     return l;
 }
 
+void reverse_array(int item)
+{
+    int tmp;
+    int i;
+    printf("Reversing arra elements\n");
+    for (i = 0; i < (item/2)+1;i++)
+    {
+        tmp = arr[i];
+        arr[i] = arr[item -1 - i];
+        arr[item-1 -i] = tmp;
+    }
+
+}
+
 void print_array(int item)
 {
     int i;
@@ -85,6 +99,8 @@ main()
     print_array(item);
 
     item = merge_array();
+    print_array(item);
+    reverse_array(item);
     print_array(item);
 
     
