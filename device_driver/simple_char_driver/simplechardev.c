@@ -13,6 +13,10 @@
 #define DEVICE_NAME     "simplechardev"
 #define CLASS_NAME      "simple"
 
+#define IOCTL_READ      _IOR('a', 0, int32_t *) 
+#define IOCTL_WRITE     _IOW('a', 1, int32_t *) 
+
+
 MODULE_AUTHOR("Hitesh Kumar");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("A simple character driver for read and write operation");
@@ -32,12 +36,14 @@ static int simplechardev_open(struct inode * inodeptr, struct file *fileptr);
 static ssize_t simplechardev_read(struct file *fileptr, char *buf, size_t len, loff_t *off);
 static ssize_t simplechardev_write(struct file *fileptr, const char *buf, size_t len, loff_t *offset);
 static int simplechardev_release(struct inode *inodeptr, struct file * fileptr);
+static long simplechardev_ioctl(struct file *flieptr, unsigned int cmd, unsigned long arg);
 
 static struct file_operations fops = {
     .open = simplechardev_open,
     .read = simplechardev_read,
     .write = simplechardev_write,
     .release = simplechardev_release,
+    .unlocked_ioctl = simplechardev_ioctl,
 };
 
 
@@ -115,6 +121,25 @@ static int simplechardev_release(struct inode *inodeptr, struct file * fileptr) 
         open_counts--;
     }
     printk(KERN_INFO "Device(%s) is closed, open count is %d\n", DEVICE_NAME, open_counts);
+    return 0;
+}
+
+static long simplechardev_ioctl(struct file *flieptr, unsigned int cmd, unsigned long arg) {
+    static int32_t value;
+    switch(cmd) {
+        case IOCTL_WRITE:
+            copy_from_user(&value, (int32_t *) arg, sizeof(value));
+            printk(KERN_INFO "Value passed from user space is %d\n", value);
+        break;
+        case IOCTL_READ:
+            value++;
+            copy_to_user((int32_t *) arg, &value, sizeof(value));
+            printk(KERN_INFO "Value sent to user is %d\n", value);
+        break;
+        default:
+            return -EFAULT;
+
+    }
     return 0;
 }
 
